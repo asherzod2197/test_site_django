@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Reyting{% endblock %}
+
+{% block content %}
+<!-- Page header -->
+<div class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-trophy me-2"></i>Reyting</h1>
+        <p class="lead">Foydalanuvchilar natijalari bo'yicha reyting jadvali</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Category filter -->
+    <div class="filter-bar mb-4 d-flex flex-wrap align-items-center gap-2 animate-in">
+        <span class="text-muted fw-600 me-2"><i class="bi bi-funnel me-1"></i>Kategoriya:</span>
+        <a href="{% url 'ratings' %}"
+            class="btn btn-sm {% if not current_category %}btn-accent{% else %}btn-outline-accent{% endif %}">
+            Barchasi
+        </a>
+        {% for cat in all_categories %}
+        <a href="{% url 'ratings' %}?category={{ cat.slug }}"
+            class="btn btn-sm {% if current_category == cat.slug %}btn-accent{% else %}btn-outline-accent{% endif %}">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if test_groups %}
+    {% for quiz_title, group in test_groups.items %}
+    <div class="rating-group animate-in mb-4">
+        <div class="rating-group-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 fw-bold">
+                <i class="bi bi-journal-check me-2 text-accent"></i>{{ quiz_title }}
+            </h4>
+            <a href="{% url 'export_ratings' %}?quiz_id={{ group.quiz_id }}{% if current_category %}&category={{ current_category }}{% endif %}"
+                class="btn btn-sm btn-outline-accent" target="_blank">
+                <i class="bi bi-download me-1"></i>CSV
+            </a>
+        </div>
+        <div class="table-responsive mt-3">
+            <table class="table table-hover table-dark-custom">
+                <thead>
+                    <tr>
+                        <th style="width: 50px">#</th>
+                        <th>Foydalanuvchi</th>
+                        <th style="width: 30%">O'rtacha %</th>
+                        <th>Topshirilgan</th>
+                        <th>O'rtacha vaqt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in group.ratings %}
+                    <tr>
+                        <td>
+                            {% if forloop.counter == 1 %}
+                            <span class="rank-badge rank-gold"><i class="bi bi-trophy-fill"></i></span>
+                            {% elif forloop.counter == 2 %}
+                            <span class="rank-badge rank-silver"><i class="bi bi-trophy-fill"></i></span>
+                            {% elif forloop.counter == 3 %}
+                            <span class="rank-badge rank-bronze"><i class="bi bi-trophy-fill"></i></span>
+                            {% else %}
+                            <span class="rank-number">{{ forloop.counter }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="user-avatar">
+                                    {{ r.username|make_list|first|upper }}
+                                </span>
+                                <span class="fw-500">{{ r.username }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress rating-progress flex-grow-1">
+                                    <div class="progress-bar
+                                         {% if r.avg_score >= 70 %}bg-success-gradient{% elif r.avg_score >= 40 %}bg-warning-gradient{% else %}bg-danger-gradient{% endif %}"
+                                        role="progressbar" style="width: {{ r.avg_score|floatformat:0 }}%;"
+                                        aria-valuenow="{{ r.avg_score|floatformat:0 }}" aria-valuemin="0"
+                                        aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <span class="score-label fw-600">{{ r.avg_score|floatformat:1 }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-tests">{{ r.tests_completed }}</span>
+                        </td>
+                        <td>
+                            <span class="text-muted">
+                                <i class="bi bi-clock me-1"></i>{{ r.avg_time_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-5 animate-in">
+        <i class="bi bi-bar-chart-line" style="font-size: 3rem; color: var(--text-muted);"></i>
+        <h5 class="mt-3 text-muted">Natijalar topilmadi</h5>
+        <p class="text-muted">Hali hech kim test topshirmagan.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

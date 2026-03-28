@@ -1,0 +1,4 @@
+Django>=5.2,<6.0
+Markdown==3.7
+bleach==6.2.0
+Pygments==2.19.1

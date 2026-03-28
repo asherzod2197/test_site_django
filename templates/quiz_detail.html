@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load quiz_tags %}
+
+{% block title %}{{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Quiz header -->
+            <div class="quiz-header animate-in">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge-category">{{ quiz.category.name }}</span>
+                        <span class="badge-difficulty badge-{{ quiz.difficulty }} ms-2">
+                            {% if quiz.difficulty == 'easy' %}Oson{% elif quiz.difficulty == 'medium' %}O'rta{% else
+                            %}Qiyin{% endif %}
+                        </span>
+                    </div>
+                    <span class="text-muted"><i class="bi bi-question-circle me-1"></i>{{ question_count }} savol</span>
+                </div>
+                <h1 class="mb-2">{{ quiz.title }}</h1>
+                {% if quiz.description %}
+                <p class="text-secondary">{{ quiz.description }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Progress bar -->
+            <div class="quiz-progress mb-4 animate-in">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="progress-label" id="progressLabel">Savol 1 / {{ question_count }}</span>
+                    <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Quiz form -->
+            <form id="quizForm" method="post" action="{% url 'quiz_submit' quiz_id=quiz.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="start_time" value="{{ start_time }}">
+
+                <div id="questionsContainer">
+                    <!-- Questions will be rendered by JS -->
+                </div>
+
+                <div class="quiz-nav mt-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-accent" id="prevBtn" disabled>
+                        <i class="bi bi-chevron-left me-1"></i>Oldingi
+                    </button>
+                    <button type="button" class="btn btn-accent" id="nextBtn">
+                        Keyingi<i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                    <button type="submit" class="btn btn-success-submit" id="submitBtn" style="display:none">
+                        <i class="bi bi-check-circle me-1"></i>Natijani ko'rish
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const questionsData = {{ questions_json| safe }};
+    const totalQuestions = questionsData.length;
+    let currentQuestion = 0;
+
+    // Store all user selections by question name
+    const savedSelections = {};
+
+
+    function renderQuestion(index) {
+        const q = questionsData[index];
+        const container = document.getElementById('questionsContainer');
+
+        // Build options from shuffled array
+        const labels = ['A', 'B', 'C', 'D'];
+        let optionsHtml = '';
+        const inputName = 'question_' + q.id;
+        // Check savedSelections for previously chosen answer
+        const savedValue = savedSelections[inputName] || '';
+
+        for (let i = 0; i < q.options.length; i++) {
+            const opt = q.options[i];
+            const inputId = inputName + '_' + opt.value;
+            const isChecked = savedValue === opt.value ? 'checked' : '';
+
+            optionsHtml += `
+            <label class="option-card" for="${inputId}">
+                <input type="radio" name="${inputName}" id="${inputId}" value="${opt.value}" ${isChecked}>
+                <span class="option-letter">${labels[i]}</span>
+                <span class="option-text">${opt.text}</span>
+            </label>
+        `;
+        }
+
+        container.innerHTML = `
+        <div class="question-block animate-in">
+            <div class="question-content md-rendered">
+                ${q.question_html}
+            </div>
+            <div class="options-list mt-3">
+                ${optionsHtml}
+            </div>
+        </div>
+    `;
+
+        // Re-highlight code blocks
+        container.querySelectorAll('pre code, .highlight pre, .codehilite pre').forEach(function (block) {
+            hljs.highlightElement(block);
+        });
+
+        // Add copy buttons
+        container.querySelectorAll('pre').forEach(function (pre) {
+            if (pre.querySelector('.copy-btn')) return;
+            var btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerHTML = '<i class="bi bi-clipboard"></i>';
+            btn.title = 'Nusxalash';
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var code = pre.querySelector('code') || pre;
+                navigator.clipboard.writeText(code.textContent).then(function () {
+                    btn.innerHTML = '<i class="bi bi-check2"></i>';
+                    setTimeout(function () { btn.innerHTML = '<i class="bi bi-clipboard"></i>'; }, 2000);
+                });
+            });
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+        });
+
+        // Update progress
+        document.getElementById('progressLabel').textContent = `Savol ${index + 1} / ${totalQuestions}`;
+        const pct = Math.round(((index + 1) / totalQuestions) * 100);
+        document.getElementById('progressPercent').textContent = pct + '%';
+        document.getElementById('progressBar').style.width = pct + '%';
+
+        // Update buttons
+        document.getElementById('prevBtn').disabled = index === 0;
+        if (index === totalQuestions - 1) {
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = '';
+        } else {
+            document.getElementById('nextBtn').style.display = '';
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+    }
+
+    // Save currently visible radio selection
+    function saveSelections() {
+        const radios = document.querySelectorAll('#questionsContainer input[type="radio"]:checked');
+        radios.forEach(function (r) {
+            savedSelections[r.name] = r.value;
+        });
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', function () {
+        if (currentQuestion < totalQuestions - 1) {
+            saveSelections();
+            currentQuestion++;
+            renderQuestion(currentQuestion);
+        }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', function () {
+        if (currentQuestion > 0) {
+            saveSelections();
+            currentQuestion--;
+            renderQuestion(currentQuestion);
+        }
+    });
+
+    // Save on radio change immediately
+    document.addEventListener('change', function (e) {
+        if (e.target.type === 'radio') {
+            savedSelections[e.target.name] = e.target.value;
+        }
+    });
+
+    // Before submit: save current selection, remove all radios from DOM,
+    // then inject hidden inputs for ALL answers to avoid duplicates
+    document.getElementById('quizForm').addEventListener('submit', function (e) {
+        saveSelections();
+
+        // Remove all radio inputs from the questions container
+        // so only hidden inputs carry the answers
+        const allRadios = document.querySelectorAll('#questionsContainer input[type="radio"]');
+        allRadios.forEach(function (r) { r.remove(); });
+
+        // Remove any previously added hidden question inputs
+        const oldHiddens = this.querySelectorAll('input[type="hidden"][name^="question_"]');
+        oldHiddens.forEach(function (h) { h.remove(); });
+
+        // Create one hidden input per answered question
+        for (const [name, value] of Object.entries(savedSelections)) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = name;
+            hidden.value = value;
+            this.appendChild(hidden);
+        }
+    });
+
+    // Initial render
+    if (totalQuestions > 0) {
+        renderQuestion(0);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load quiz_tags %}
+
+{% block title %}Natija — {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Score summary -->
+            <div class="result-summary animate-in text-center mb-4">
+                <h1 class="mb-3">{{ quiz.title }}</h1>
+                <div
+                    class="result-circle {% if percentage >= 70 %}result-good{% elif percentage >= 40 %}result-mid{% else %}result-bad{% endif %}">
+                    <span class="result-score">{{ score }}/{{ total }}</span>
+                    <span class="result-percent">{{ percentage }}%</span>
+                </div>
+                <p class="mt-3 text-secondary">
+                    {% if percentage >= 70 %}
+                    <i class="bi bi-emoji-smile text-success me-1"></i>Ajoyib natija!
+                    {% elif percentage >= 40 %}
+                    <i class="bi bi-emoji-neutral text-warning me-1"></i>Yaxshi urinish!
+                    {% else %}
+                    <i class="bi bi-emoji-frown text-danger me-1"></i>Ko'proq mashq qilish kerak.
+                    {% endif %}
+                </p>
+                <p class="text-muted small">
+                    <i class="bi bi-calendar3 me-1"></i>Topshirilgan: {{ result.completed_at|date:"d.m.Y, H:i" }}
+                </p>
+                <div class="alert alert-info mt-3 small">
+                    <i class="bi bi-info-circle me-1"></i>Har bir testni faqat <strong>1 marta</strong> topshirish
+                    mumkin. Qayta topshirish imkoni yo'q.
+                </div>
+                <a href="{% url 'index' %}" class="btn btn-outline-accent mt-2">
+                    <i class="bi bi-house-door me-1"></i>Bosh sahifaga qaytish
+                </a>
+            </div>
+
+            <!-- Questions with correct answers and explanations -->
+            <h4 class="mb-3"><i class="bi bi-list-check me-2"></i>Savollar va to'g'ri javoblar</h4>
+            {% for r in results %}
+            <div class="result-card animate-in mb-3" style="border-left: 4px solid var(--accent)">
+                <div class="result-card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Savol {{ forloop.counter }}</span>
+                    <span class="badge bg-secondary">To'g'ri javob: {{ r.correct_option|upper }}</span>
+                </div>
+                <div class="result-card-body">
+                    <div class="md-rendered mb-3">{{ r.question_html|safe }}</div>
+
+                    <div class="options-review">
+                        {% if r.option_a %}
+                        <div class="option-review {% if r.correct_option == 'a' %}option-correct{% endif %}">
+                            <span class="option-letter-sm">A</span>
+                            <span>{{ r.option_a|safe }}</span>
+                        </div>
+                        {% endif %}
+                        {% if r.option_b %}
+                        <div class="option-review {% if r.correct_option == 'b' %}option-correct{% endif %}">
+                            <span class="option-letter-sm">B</span>
+                            <span>{{ r.option_b|safe }}</span>
+                        </div>
+                        {% endif %}
+                        {% if r.option_c %}
+                        <div class="option-review {% if r.correct_option == 'c' %}option-correct{% endif %}">
+                            <span class="option-letter-sm">C</span>
+                            <span>{{ r.option_c|safe }}</span>
+                        </div>
+                        {% endif %}
+                        {% if r.option_d %}
+                        <div class="option-review {% if r.correct_option == 'd' %}option-correct{% endif %}">
+                            <span class="option-letter-sm">D</span>
+                            <span>{{ r.option_d|safe }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if r.explanation_html %}
+                    <div class="explanation-block mt-3">
+                        <div class="explanation-label"><i class="bi bi-lightbulb me-1"></i>Tushuntirish:</div>
+                        <div class="md-rendered">{{ r.explanation_html|safe }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

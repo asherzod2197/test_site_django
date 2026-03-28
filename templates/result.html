@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load quiz_tags %}
+
+{% block title %}Natija — {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Score summary -->
+            <div class="result-summary animate-in text-center mb-4">
+                <h1 class="mb-3">{{ quiz.title }}</h1>
+                <div
+                    class="result-circle {% if percentage >= 70 %}result-good{% elif percentage >= 40 %}result-mid{% else %}result-bad{% endif %}">
+                    <span class="result-score">{{ score }}/{{ total }}</span>
+                    <span class="result-percent">{{ percentage }}%</span>
+                </div>
+                <p class="mt-3 text-secondary">
+                    {% if percentage >= 70 %}
+                    <i class="bi bi-emoji-smile text-success me-1"></i>Ajoyib natija! Siz juda yaxshi bilasiz.
+                    {% elif percentage >= 40 %}
+                    <i class="bi bi-emoji-neutral text-warning me-1"></i>Yaxshi urinish! Yana mashq qiling.
+                    {% else %}
+                    <i class="bi bi-emoji-frown text-danger me-1"></i>Ko'proq mashq qilish kerak.
+                    {% endif %}
+                </p>
+                <div class="alert alert-info mt-3 small">
+                    <i class="bi bi-info-circle me-1"></i>Har bir testni faqat <strong>1 marta</strong> topshirish
+                    mumkin. Qayta topshirish imkoni yo'q.
+                </div>
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <a href="{% url 'index' %}" class="btn btn-outline-accent">
+                        <i class="bi bi-house-door me-1"></i>Bosh sahifa
+                    </a>
+                </div>
+            </div>
+
+            <!-- Detailed results -->
+            <h4 class="mb-3"><i class="bi bi-list-check me-2"></i>Batafsil natijalar</h4>
+            {% for r in results %}
+            <div
+                class="result-card animate-in {% if r.is_correct %}result-correct{% else %}result-wrong{% endif %} mb-3">
+                <div class="result-card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Savol {{ forloop.counter }}</span>
+                    {% if r.is_correct %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>To'g'ri</span>
+                    {% else %}
+                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Noto'g'ri</span>
+                    {% endif %}
+                </div>
+                <div class="result-card-body">
+                    <div class="md-rendered mb-3">{{ r.question_html|safe }}</div>
+
+                    <div class="options-review">
+                        {% with opts="a b c d" %}
+                        {% for opt in opts.split %}
+                        {% if opt == "a" and r.option_a %}
+                        <div
+                            class="option-review {% if r.correct_option == 'a' %}option-correct{% endif %} {% if r.user_answer == 'a' and r.correct_option != 'a' %}option-user-wrong{% endif %}">
+                            <span class="option-letter-sm">A</span>
+                            <span>{{ r.option_a|safe }}</span>
+                            {% if r.user_answer == 'a' %}<i class="bi bi-arrow-left ms-auto"
+                                title="Sizning javobingiz"></i>{% endif %}
+                        </div>
+                        {% elif opt == "b" and r.option_b %}
+                        <div
+                            class="option-review {% if r.correct_option == 'b' %}option-correct{% endif %} {% if r.user_answer == 'b' and r.correct_option != 'b' %}option-user-wrong{% endif %}">
+                            <span class="option-letter-sm">B</span>
+                            <span>{{ r.option_b|safe }}</span>
+                            {% if r.user_answer == 'b' %}<i class="bi bi-arrow-left ms-auto"
+                                title="Sizning javobingiz"></i>{% endif %}
+                        </div>
+                        {% elif opt == "c" and r.option_c %}
+                        <div
+                            class="option-review {% if r.correct_option == 'c' %}option-correct{% endif %} {% if r.user_answer == 'c' and r.correct_option != 'c' %}option-user-wrong{% endif %}">
+                            <span class="option-letter-sm">C</span>
+                            <span>{{ r.option_c|safe }}</span>
+                            {% if r.user_answer == 'c' %}<i class="bi bi-arrow-left ms-auto"
+                                title="Sizning javobingiz"></i>{% endif %}
+                        </div>
+                        {% elif opt == "d" and r.option_d %}
+                        <div
+                            class="option-review {% if r.correct_option == 'd' %}option-correct{% endif %} {% if r.user_answer == 'd' and r.correct_option != 'd' %}option-user-wrong{% endif %}">
+                            <span class="option-letter-sm">D</span>
+                            <span>{{ r.option_d|safe }}</span>
+                            {% if r.user_answer == 'd' %}<i class="bi bi-arrow-left ms-auto"
+                                title="Sizning javobingiz"></i>{% endif %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+
+                    {% if r.explanation_html %}
+                    <div class="explanation-block mt-3">
+                        <div class="explanation-label"><i class="bi bi-lightbulb me-1"></i>Tushuntirish:</div>
+                        <div class="md-rendered">{{ r.explanation_html|safe }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Natijalarim{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-bar-chart me-2"></i>Mening natijalarim</h1>
+        <p class="lead">{{ user.username }} — barcha test natijalari</p>
+    </div>
+</section>
+
+<div class="container">
+    {% if results %}
+    <div class="table-responsive">
+        <table class="table table-dark-custom table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Test nomi</th>
+                    <th>Kategoriya</th>
+                    <th>Natija</th>
+                    <th>Foiz</th>
+                    <th>Vaqt</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'quiz_result' quiz_id=r.quiz.id %}">{{ r.quiz.title }}</a>
+                    </td>
+                    <td><span class="badge-category">{{ r.quiz.category.name }}</span></td>
+                    <td>{{ r.score }} / {{ r.total }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="height:6px; max-width:100px">
+                                <div class="progress-bar {% if r.percentage >= 70 %}bg-success{% elif r.percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                    style="width:{{ r.percentage }}%"></div>
+                            </div>
+                            <span class="small">{{ r.percentage }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="small">
+                            <i class="bi bi-clock me-1"></i>{{ r.duration_display }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ r.completed_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Per-category stats -->
+    <h4 class="mt-4 mb-3"><i class="bi bi-pie-chart me-2"></i>Kategoriyalar bo'yicha statistika</h4>
+    <div class="row g-3 mb-4">
+        {% regroup results by quiz.category as category_results %}
+        {% for group in category_results %}
+        <div class="col-md-4 col-6">
+            <div class="stat-widget text-center">
+                <h6>{{ group.grouper.name }}</h6>
+                <div class="stat-number" style="font-size:1.5rem">{{ group.list|length }}</div>
+                <div class="stat-label">test topshirilgan</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-journal-x display-3 text-secondary"></i>
+        <p class="text-secondary mt-3">Siz hali hech qanday test ishlamadingiz.</p>
+        <a href="{% url 'index' %}" class="btn btn-accent mt-2">
+            <i class="bi bi-play-fill me-1"></i>Testlarni ko'rish
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

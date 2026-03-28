@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Foydalanuvchilar{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-2 admin-sidebar d-none d-lg-block">
+            <nav class="nav flex-column mt-3">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+                <a class="nav-link" href="{% url 'admin_quiz_list' %}"><i class="bi bi-journal-code"></i>Testlar</a>
+                <a class="nav-link" href="{% url 'admin_category_list' %}"><i class="bi bi-folder"></i>Kategoriyalar</a>
+                <a class="nav-link active" href="{% url 'admin_user_list' %}"><i
+                        class="bi bi-people"></i>Foydalanuvchilar</a>
+                <hr style="border-color:var(--border-color)">
+                <a class="nav-link" href="{% url 'index' %}"><i class="bi bi-house-door"></i>Saytga qaytish</a>
+            </nav>
+        </div>
+        <div class="col-lg-10 p-4">
+            <h2 class="mb-4"><i class="bi bi-people me-2"></i>Foydalanuvchilar</h2>
+            <div class="table-responsive">
+                <table class="table table-dark-custom table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Admin</th>
+                            <th>Test natijalari</th>
+                            <th>Ro'yxatdan o'tgan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>
+                                <i class="bi bi-person-circle me-1"></i>{{ u.username }}
+                            </td>
+                            <td>
+                                {% if u.is_staff %}
+                                <span class="badge bg-success">Admin</span>
+                                {% else %}
+                                <span class="badge bg-secondary">User</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ u.result_count }} ta test</td>
+                            <td class="text-muted small">{{ u.date_joined|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

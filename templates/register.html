@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Ro'yxatdan o'tish{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="login-card animate-in">
+        <h2><i class="bi bi-person-plus me-2" style="color:var(--accent-light)"></i>Ro'yxatdan o'tish</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label" for="id_username">Foydalanuvchi nomi</label>
+                {{ form.username }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="id_password1">Parol</label>
+                <div class="input-group">
+                    <input type="password" name="password1" class="form-control" id="id_password1"
+                        placeholder="Parol kiriting" required>
+                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="id_password2">Parolni tasdiqlang</label>
+                <div class="input-group">
+                    <input type="password" name="password2" class="form-control" id="id_password2"
+                        placeholder="Parolni qayta kiriting" required>
+                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password2">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            {% if form.errors %}
+            <div class="alert alert-danger small">
+                {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-accent w-100">
+                <i class="bi bi-person-plus me-1"></i>Ro'yxatdan o'tish
+            </button>
+        </form>
+        <p class="text-center mt-3 text-secondary small">
+            Hisobingiz bormi?
+            <a href="{% url 'login' %}">Kirish</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

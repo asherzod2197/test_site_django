@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Kirish{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="login-card animate-in">
+        <h2><i class="bi bi-box-arrow-in-right me-2" style="color:var(--accent-light)"></i>Kirish</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label" for="id_username">Foydalanuvchi nomi</label>
+                <input type="text" name="username" class="form-control" id="id_username"
+                    placeholder="Foydalanuvchi nomi" autofocus required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="id_password">Parol</label>
+                <div class="input-group">
+                    <input type="password" name="password" class="form-control" id="id_password" placeholder="Parol"
+                        required>
+                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-accent w-100">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Kirish
+            </button>
+        </form>
+        <p class="text-center mt-3 text-secondary small">
+            Hisobingiz yo'qmi?
+            <a href="{% url 'register' %}">Ro'yxatdan o'ting</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

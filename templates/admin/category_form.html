@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{% if editing %}Kategoriyani tahrirlash{% else %}Yangi kategoriya{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-2 admin-sidebar d-none d-lg-block">
+            <nav class="nav flex-column mt-3">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+                <a class="nav-link" href="{% url 'admin_quiz_list' %}"><i class="bi bi-journal-code"></i>Testlar</a>
+                <a class="nav-link active" href="{% url 'admin_category_list' %}"><i
+                        class="bi bi-folder"></i>Kategoriyalar</a>
+                <a class="nav-link" href="{% url 'admin_user_list' %}"><i class="bi bi-people"></i>Foydalanuvchilar</a>
+                <hr style="border-color:var(--border-color)">
+                <a class="nav-link" href="{% url 'index' %}"><i class="bi bi-house-door"></i>Saytga qaytish</a>
+            </nav>
+        </div>
+        <div class="col-lg-10 p-4">
+            <h2 class="mb-4">
+                <i class="bi bi-{% if editing %}pencil{% else %}folder-plus{% endif %} me-2"></i>
+                {% if editing %}Kategoriyani tahrirlash{% else %}Yangi kategoriya{% endif %}
+            </h2>
+            <div class="col-lg-6">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nomi *</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Slug *</label>
+                        {{ form.slug }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tavsif</label>
+                        {{ form.description }}
+                    </div>
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-accent">
+                            <i class="bi bi-check-circle me-1"></i>{% if editing %}Saqlash{% else %}Yaratish{% endif %}
+                        </button>
+                        <a href="{% url 'admin_category_list' %}" class="btn btn-outline-accent">
+                            <i class="bi bi-x-circle me-1"></i>Bekor qilish
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

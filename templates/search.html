@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Qidiruv{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-search me-2"></i>Qidiruv natijalari</h1>
+        {% if query %}
+        <p class="lead">"{{ query }}" bo'yicha topildi: {{ quizzes.paginator.count }} ta test</p>
+        {% endif %}
+    </div>
+</section>
+
+<div class="container">
+    <div class="row g-4">
+        {% for quiz in quizzes %}
+        <div class="col-md-6 col-lg-4 animate-in">
+            <div class="quiz-card">
+                <div class="quiz-card-header">
+                    <span class="badge-category">{{ quiz.category.name }}</span>
+                    <span class="badge-difficulty badge-{{ quiz.difficulty }}">
+                        {% if quiz.difficulty == 'easy' %}Oson{% elif quiz.difficulty == 'medium' %}O'rta{% else
+                        %}Qiyin{% endif %}
+                    </span>
+                </div>
+                <div class="quiz-card-body">
+                    <h5 class="quiz-card-title">{{ quiz.title }}</h5>
+                    <p class="quiz-card-text">{{ quiz.description|truncatewords:20 }}</p>
+                </div>
+                <div class="quiz-card-footer">
+                    <span><i class="bi bi-question-circle me-1"></i>{{ quiz.q_count }} savol</span>
+                    {% if quiz.id in completed_quiz_ids %}
+                    <a href="{% url 'quiz_result' quiz_id=quiz.id %}" class="btn btn-sm"
+                        style="background:var(--success);color:#fff;font-weight:600">
+                        <i class="bi bi-check-circle me-1"></i>Topshirilgan
+                    </a>
+                    {% else %}
+                    <a href="{% url 'quiz_detail' quiz_id=quiz.id %}" class="btn btn-accent btn-sm">
+                        <i class="bi bi-play-fill me-1"></i>Boshlash
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-search display-3 text-secondary"></i>
+            <p class="text-secondary mt-3">Hech narsa topilmadi.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

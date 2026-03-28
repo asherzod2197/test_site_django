@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Bosh sahifa{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-code-slash me-2"></i>Quiz Platform</h1>
+        <p class="lead">Dasturlash bo'yicha bilimingizni sinab ko'ring</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row g-4">
+        <!-- Main content -->
+        <div class="col-lg-8">
+            <!-- Filters -->
+            <div class="filter-bar mb-4">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <a href="{% url 'index' %}"
+                        class="btn btn-sm {% if not current_category and not current_difficulty %}btn-accent{% else %}btn-outline-accent{% endif %}">
+                        Barchasi
+                    </a>
+                    {% for cat in all_categories %}
+                    <a href="{% url 'index' %}?category={{ cat.slug }}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}"
+                        class="btn btn-sm {% if current_category == cat.slug %}btn-accent{% else %}btn-outline-accent{% endif %}">
+                        {{ cat.name }}
+                    </a>
+                    {% endfor %}
+                    <span class="text-muted mx-2">|</span>
+                    <a href="{% url 'index' %}?difficulty=easy{% if current_category %}&category={{ current_category }}{% endif %}"
+                        class="btn btn-sm {% if current_difficulty == 'easy' %}btn-success-custom{% else %}btn-outline-success-custom{% endif %}">
+                        <i class="bi bi-star me-1"></i>Oson
+                    </a>
+                    <a href="{% url 'index' %}?difficulty=medium{% if current_category %}&category={{ current_category }}{% endif %}"
+                        class="btn btn-sm {% if current_difficulty == 'medium' %}btn-warning-custom{% else %}btn-outline-warning-custom{% endif %}">
+                        <i class="bi bi-star-half me-1"></i>O'rta
+                    </a>
+                    <a href="{% url 'index' %}?difficulty=hard{% if current_category %}&category={{ current_category }}{% endif %}"
+                        class="btn btn-sm {% if current_difficulty == 'hard' %}btn-danger-custom{% else %}btn-outline-danger-custom{% endif %}">
+                        <i class="bi bi-stars me-1"></i>Qiyin
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quiz cards -->
+            <div class="row g-4">
+                {% for quiz in quizzes %}
+                <div class="col-md-6 animate-in">
+                    <div class="quiz-card">
+                        <div class="quiz-card-header">
+                            <span class="badge-category">{{ quiz.category.name }}</span>
+                            <span class="badge-difficulty badge-{{ quiz.difficulty }}">
+                                {% if quiz.difficulty == 'easy' %}
+                                <i class="bi bi-star"></i> Oson
+                                {% elif quiz.difficulty == 'medium' %}
+                                <i class="bi bi-star-half"></i> O'rta
+                                {% else %}
+                                <i class="bi bi-stars"></i> Qiyin
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="quiz-card-body">
+                            <h5 class="quiz-card-title">{{ quiz.title }}</h5>
+                            <p class="quiz-card-text">{{ quiz.description|truncatewords:20 }}</p>
+                        </div>
+                        <div class="quiz-card-footer">
+                            <div class="quiz-card-meta">
+                                <span><i class="bi bi-question-circle me-1"></i>{{ quiz.q_count }} savol</span>
+                                <span><i class="bi bi-calendar3 me-1"></i>{{ quiz.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                            {% if quiz.id in completed_quiz_ids %}
+                            <a href="{% url 'quiz_result' quiz_id=quiz.id %}" class="btn btn-sm"
+                                style="background:var(--success);color:#fff;font-weight:600">
+                                <i class="bi bi-check-circle me-1"></i>Topshirilgan
+                            </a>
+                            {% else %}
+                            <a href="{% url 'quiz_detail' quiz_id=quiz.id %}" class="btn btn-accent btn-sm">
+                                <i class="bi bi-play-fill me-1"></i>Boshlash
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="bi bi-journal-code display-3 text-secondary"></i>
+                        <p class="text-secondary mt-3">Hozircha testlar mavjud emas.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if quizzes.has_other_pages %}
+            <nav class="mt-4 mb-4" aria-label="Paginatsiya">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not quizzes.has_previous %}disabled{% endif %}">
+                        {% if quizzes.has_previous %}
+                        <a class="page-link"
+                            href="?page={{ quizzes.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                        {% else %}
+                        <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                        {% endif %}
+                    </li>
+                    {% for num in quizzes.paginator.page_range %}
+                    <li class="page-item {% if quizzes.number == num %}active{% endif %}">
+                        <a class="page-link"
+                            href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item {% if not quizzes.has_next %}disabled{% endif %}">
+                        {% if quizzes.has_next %}
+                        <a class="page-link"
+                            href="?page={{ quizzes.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_difficulty %}&difficulty={{ current_difficulty }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        {% else %}
+                        <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Statistics -->
+            <div class="stat-widget animate-in">
+                <h5><i class="bi bi-bar-chart me-1"></i>Statistika</h5>
+                <div class="stat-row">
+                    <div class="stat-icon purple"><i class="bi bi-journal-code"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stat_quizzes }}</div>
+                        <div class="stat-label">Testlar</div>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon blue"><i class="bi bi-question-circle"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stat_questions }}</div>
+                        <div class="stat-label">Savollar</div>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon green"><i class="bi bi-people"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stat_users }}</div>
+                        <div class="stat-label">Foydalanuvchilar</div>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-icon orange"><i class="bi bi-check-circle"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stat_results }}</div>
+                        <div class="stat-label">Topshirilgan testlar</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="sidebar-widget animate-in">
+                <h5><i class="bi bi-grid me-1"></i>Kategoriyalar</h5>
+                <ul class="list-group list-group-flush">
+                    {% for cat in all_categories %}
+                    <li class="list-group-item">
+                        <a href="{% url 'category_page' slug=cat.slug %}"
+                            class="d-flex justify-content-between align-items-center text-decoration-none"
+                            style="color: inherit">
+                            {{ cat.name }}
+                            <span class="badge-category">{{ cat.quiz_set.count }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if not user.is_authenticated %}
+            <!-- CTA for unregistered users -->
+            <div class="stat-widget animate-in text-center">
+                <i class="bi bi-person-plus display-4" style="color:var(--accent)"></i>
+                <h5 class="mt-2">Ro'yxatdan o'ting</h5>
+                <p class="text-muted small mb-3">Testlarni yechish uchun ro'yxatdan o'tishingiz kerak</p>
+                <a href="{% url 'register' %}" class="btn btn-accent btn-sm">
+                    <i class="bi bi-person-plus me-1"></i>Ro'yxatdan o'tish
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

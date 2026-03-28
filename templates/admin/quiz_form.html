@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{% if editing %}Testni tahrirlash{% else %}Yangi test{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-2 admin-sidebar d-none d-lg-block">
+            <nav class="nav flex-column mt-3">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i>Dashboard</a>
+                <a class="nav-link active" href="{% url 'admin_quiz_list' %}"><i
+                        class="bi bi-journal-code"></i>Testlar</a>
+                <a class="nav-link" href="{% url 'admin_category_list' %}"><i class="bi bi-folder"></i>Kategoriyalar</a>
+                <a class="nav-link" href="{% url 'admin_user_list' %}"><i class="bi bi-people"></i>Foydalanuvchilar</a>
+                <hr style="border-color:var(--border-color)">
+                <a class="nav-link" href="{% url 'index' %}"><i class="bi bi-house-door"></i>Saytga qaytish</a>
+            </nav>
+        </div>
+        <div class="col-lg-10 p-4">
+            <h2 class="mb-4">
+                <i class="bi bi-{% if editing %}pencil{% else %}plus-circle{% endif %} me-2"></i>
+                {% if editing %}Testni tahrirlash: {{ quiz.title }}{% else %}Yangi test qo'shish{% endif %}
+            </h2>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <label class="form-label">Sarlavha *</label>
+                            {{ form.title }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tavsif</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kategoriya *</label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Qiyinlik darajasi</label>
+                                {{ form.difficulty }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <label class="form-label">.md fayl yuklash</label>
+                            {{ form.markdown_upload }}
+                            <small class="text-muted">Faqat .md fayllar qabul qilinadi (maks 5 MB)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">yoki Markdown kontent yozing</label>
+                            <textarea name="markdown_content" class="form-control" rows="12"
+                                placeholder="## Savol 1&#10;&#10;Savol matni...&#10;&#10;- [A] Variant A&#10;- [B] Variant B&#10;- [C] Variant C&#10;- [D] Variant D&#10;&#10;> **To'g'ri javob:** B&#10;> **Tushuntirish:** Tushuntirish matni&#10;&#10;---">{% if existing_md %}{{ existing_md }}{% endif %}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                    <div>{{ error }}</div>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-accent">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {% if editing %}Saqlash{% else %}Yaratish{% endif %}
+                    </button>
+                    <a href="{% url 'admin_quiz_list' %}" class="btn btn-outline-accent">
+                        <i class="bi bi-x-circle me-1"></i>Bekor qilish
+                    </a>
+                </div>
+            </form>
+
+            <!-- Format help -->
+            <div class="mt-4 p-3"
+                style="background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border-color)">
+                <h6><i class="bi bi-info-circle me-1"></i>Markdown format qoidalari:</h6>
+                <pre class="small" style="color:var(--text-secondary); white-space:pre-wrap">## Savol 1
+
+Savol matni yoki kod bloki:
+
+```python
+print("Salom!")
+```
+
+- [A] Birinchi variant
+- [B] Ikkinchi variant
+- [C] Uchinchi variant
+- [D] To'rtinchi variant (ixtiyoriy)
+
+> **To'g'ri javob:** B
+> **Tushuntirish:** Nima uchun B to'g'ri ekanligi haqida
+
+---
+
+## Savol 2
+...</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

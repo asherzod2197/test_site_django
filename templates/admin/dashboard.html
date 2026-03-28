@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 admin-sidebar d-none d-lg-block">
+            <nav class="nav flex-column mt-3">
+                <a class="nav-link active" href="{% url 'admin_dashboard' %}">
+                    <i class="bi bi-speedometer2"></i>Dashboard
+                </a>
+                <a class="nav-link" href="{% url 'admin_quiz_list' %}">
+                    <i class="bi bi-journal-code"></i>Testlar
+                </a>
+                <a class="nav-link" href="{% url 'admin_category_list' %}">
+                    <i class="bi bi-folder"></i>Kategoriyalar
+                </a>
+                <a class="nav-link" href="{% url 'admin_user_list' %}">
+                    <i class="bi bi-people"></i>Foydalanuvchilar
+                </a>
+                <hr style="border-color:var(--border-color)">
+                <a class="nav-link" href="{% url 'index' %}">
+                    <i class="bi bi-house-door"></i>Saytga qaytish
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-lg-10 p-4">
+            <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+
+            <!-- Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ quiz_count }}</div>
+                        <div class="stat-label"><i class="bi bi-journal-code me-1"></i>Testlar</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ question_count }}</div>
+                        <div class="stat-label"><i class="bi bi-question-circle me-1"></i>Savollar</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ category_count }}</div>
+                        <div class="stat-label"><i class="bi bi-folder me-1"></i>Kategoriyalar</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ user_count }}</div>
+                        <div class="stat-label"><i class="bi bi-people me-1"></i>Foydalanuvchilar</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick links -->
+            <div class="row g-3 mb-4">
+                <div class="col-auto">
+                    <a href="{% url 'admin_quiz_add' %}" class="btn btn-accent">
+                        <i class="bi bi-plus-circle me-1"></i>Yangi test qo'shish
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'admin_category_add' %}" class="btn btn-outline-accent">
+                        <i class="bi bi-folder-plus me-1"></i>Kategoriya qo'shish
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent results -->
+            {% if recent_results %}
+            <h5 class="mb-3"><i class="bi bi-clock-history me-1"></i>So'nggi natijalar</h5>
+            <div class="table-responsive">
+                <table class="table table-dark-custom table-hover">
+                    <thead>
+                        <tr>
+                            <th>Foydalanuvchi</th>
+                            <th>Test</th>
+                            <th>Natija</th>
+                            <th>Sana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in recent_results %}
+                        <tr>
+                            <td>{{ r.user.username }}</td>
+                            <td>{{ r.quiz.title }}</td>
+                            <td>{{ r.score }}/{{ r.total }} ({{ r.percentage }}%)</td>
+                            <td class="text-muted small">{{ r.completed_at|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
